@@ -1,2 +1,20 @@
+# Build
+
 mvn clean package
 
+# Use
+
+usage: java -jar excel2csv-1.0.0.jar [OPTIONS] <source> [<destination-folder>]
+            Here <source> is XLS or XSLX file <destination-folder> folder for CSV files. If not
+            specified <source> folder will be used.
+ -f,--format      Optional. This argument can take one of two values. Passing 0 (zero) will result
+                  in a CSV file that obeys Excel's formatting conventions whilst passing 1 (one)
+                  will result in a file that obeys UNIX formatting conventions. If no value is
+                  passed, then the CSV file produced will obey Excel's formatting conventions.
+ -h,--help        Prints this help message.
+ -r,--row-limit   Rows limit per sheet. Default unlimited (-1). Will produce preview file per sheet.
+ -s,--separator   Optional. The character or characters that should be used to separate fields in
+                  the CSV record. If no value is passed then the comma will be assumed.
+
+Example:
+java -Dfile.encoding=utf8 -Xms512m -Xmx512m -XX:MaxPermSize=256m -jar excel2csv-1.0.0.jar file.xls
