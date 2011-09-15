@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
 
   <name>excel2csv</name>
-  <url>http://github.com/anjlab/excel2csv</url>
+  <url>http://github.com/anjlab/excel2csv-java</url>
 
   <build>
     <plugins>
