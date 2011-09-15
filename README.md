@@ -4,9 +4,13 @@
 
     gem install excel2csv
 
-    With Gemfile
+
+With Gemfile
 
     gem 'excel2csv'
+
+
+    require 'excel2csv'
 
     Excel2CSV.read "path/to/file.xls"
     Excel2CSV.read "path/to/file.xlsx"
