@@ -57,7 +57,8 @@ module Excel2CSV
       tmp_dir = Dir.mktmpdir
       dest_folder = options[:dest_folder] || tmp_dir
       java_options = options[:java_options] || "-Dfile.encoding=utf8 -Xms512m -Xmx512m -XX:MaxPermSize=256m"
-      `java #{java_options} -jar lib/excel2csv.jar #{path} #{dest_folder}`
+      jar_path = File.join(File.dirname(__FILE__), "excel2csv.jar")
+      `java #{java_options} -jar #{jar_path} #{path} #{dest_folder}`
       info = Info.read dest_folder, tmp_dir
       if block_given?
         yield info
