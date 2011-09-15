@@ -7,16 +7,16 @@ describe Excel2CSV do
 
   it "reads xls files" do
     data = excel.read "spec/fixtures/basic_types.xls"
-    data[0].should == ["1.00", "24.12.2011", "Hello"]
-    data[1].should == ["2.00", "25.12.2011", "Привет"]
-    data[2].should == ["3.00", "26.12.2011", 'Привет, "я excel!"']
+    data[0].should == ["1.00", "2011-12-23 21:00:00 UTC(+0000)", "Hello"]
+    data[1].should == ["2.00", "2011-12-24 21:00:00 UTC(+0000)", "Привет"]
+    data[2].should == ["3.00", "2011-12-25 21:00:00 UTC(+0000)", 'Привет, "я excel!"']
   end
 
   it "reads xlsx files" do
     data = excel.read "spec/fixtures/basic_types.xlsx"
-    data[0].should == ["1.00", "24.12.2011", "Hello"]
-    data[1].should == ["2.00", "25.12.2011", "Привет"]
-    data[2].should == ["3.00", "26.12.2011", 'Привет, "я excel!"']
+    data[0].should == ["1.00", "2011-12-23 21:00:00 UTC(+0000)", "Hello"]
+    data[1].should == ["2.00", "2011-12-24 21:00:00 UTC(+0000)", "Привет"]
+    data[2].should == ["3.00", "2011-12-25 21:00:00 UTC(+0000)", 'Привет, "я excel!"']
   end
 
   it "iterates rows" do
@@ -31,7 +31,7 @@ describe Excel2CSV do
   it "removes tmp dir after work" do
     tmp_dir = nil
     excel.convert "spec/fixtures/basic_types.xlsx" do |info|
-      puts IO.read(info.sheets.first[:path])
+      # puts IO.read(info.sheets.first[:path])
       tmp_dir = info.tmp_dir
     end
     tmp_dir.should_not be_nil
