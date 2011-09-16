@@ -40,7 +40,33 @@ describe Excel2CSV do
 
   it "converts once if info is passed" do
     info = excel.convert "spec/fixtures/basic_types.xlsx"
+    info.sheets.length.should == 1
+    info.previews.length.should == 0
     info.should == excel.convert("spec/fixtures/basic_types.xlsx", info:info)
+  end
+
+  it "regenerate csv files if working_dir is removed" do
+    info = excel.convert "spec/fixtures/basic_types.xlsx"
+    info.close
+    info.should_not == excel.convert("spec/fixtures/basic_types.xlsx", info:info)
+  end
+
+  it "generates preview csv files with rows limit" do
+    info = excel.convert "spec/fixtures/basic_types.xls", rows_limit:1
+    info.sheets.length.should == 1
+    info.previews.length.should == 1
+
+    info.sheets.first[:total_rows].should == 3
+    info.previews.first[:total_rows].should == 3
+
+    info.sheets.first[:rows].should == 3
+    info.previews.first[:rows].should == 1
+  end
+
+  it "reads previews" do
+    data = excel.read("spec/fixtures/basic_types.xls", rows_limit:1, preview:true, index:0)
+    data.length.should == 1
+    data[0].should == ["1.00", "2011-12-23 21:00:00 UTC(+0000)", "Hello"]
   end
 
 end
