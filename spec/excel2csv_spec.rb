@@ -38,4 +38,9 @@ describe Excel2CSV do
     Dir.exists?(tmp_dir).should == false
   end
 
+  it "converts once if info is passed" do
+    info = excel.convert "spec/fixtures/basic_types.xlsx"
+    info.should == excel.convert("spec/fixtures/basic_types.xlsx", info:info)
+  end
+
 end
