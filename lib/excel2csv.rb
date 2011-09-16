@@ -129,14 +129,7 @@ module Excel2CSV
 
   def clean_options options
     options.dup.delete_if do |key, value|
-      [ :dest_folder,
-        :java_options,
-        :preview,
-        :index,
-        :path,
-        :rows_limit,
-        :info
-      ].include?(key)
+      [:dest_folder, :java_options, :preview, :index, :path, :rows_limit, :info].include?(key)
     end
   end
 
