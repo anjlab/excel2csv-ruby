@@ -1,4 +1,7 @@
 #encoding: utf-8
+Encoding.default_internal='utf-8'
+Encoding.default_external='utf-8'
+
 require 'excel2csv'
 
 describe Excel2CSV do
@@ -68,5 +71,22 @@ describe Excel2CSV do
     data.length.should == 1
     data[0].should == ["1.00", "2011-12-23 21:00:00 UTC(+0000)", "Hello"]
   end
+
+  it "reads csv files" do
+    data = excel.read("spec/fixtures/basic_types.csv", encoding:'windows-1251:utf-8')
+    data[0].should == ["1.00","12/24/11 12:00 AM","Hello"]
+    data[1].should == ["2.00","12/25/11 12:00 AM","Привет"]
+    data[2].should == ["3.00","12/26/11 12:00 AM",'Привет, "я excel!"']
+  end
+
+  it "reads csv files with preview" do
+    data = excel.read("spec/fixtures/basic_types.csv", encoding:'windows-1251:utf-8',rows_limit:2,preview:true)
+    data[0].should == ["1.00","12/24/11 12:00 AM","Hello"]
+    data[1].should == ["2.00","12/25/11 12:00 AM","Привет"]
+  end
+
+  # Date, Boolean, String, [Phone, Percent, Email, Gender, Url]
+  # Несколько телефонов, 
+
 
 end
