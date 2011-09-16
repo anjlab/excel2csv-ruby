@@ -48,7 +48,7 @@ describe Excel2CSV do
 
   it "regenerate csv files if working_dir is removed" do
     info = excel.convert "spec/fixtures/basic_types.xlsx"
-    info.close
+    info.clean
     info.should_not == excel.convert("spec/fixtures/basic_types.xlsx", info:info)
   end
 

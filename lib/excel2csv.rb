@@ -32,7 +32,7 @@ module Excel2CSV
       end
     end 
 
-    def close
+    def clean
       FileUtils.remove_entry_secure(@tmp_dir, true) if @tmp_dir
     end
 
@@ -76,7 +76,7 @@ module Excel2CSV
         info
       end
     ensure
-      info.close if block_given? && info
+      info.clean if block_given? && info
     end
   end
 
