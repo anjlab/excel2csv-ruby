@@ -23,7 +23,7 @@ describe Excel2CSV do
     data[2].should == ["3.00", "2011-12-25 21:00:00 UTC(+0000)", 'Привет, "я excel!"']
   end
 
-  it "iterates rows" do
+  it "iterates rows like CSV lib" do
     count = 0
     excel.foreach xls_basic_types do |row|
       row.length.should == 3

@@ -98,8 +98,7 @@ module Excel2CSV
   def create_cvs_files(path, options)
     tmp_dir = Dir.mktmpdir
     dest_folder = options[:dest_folder] || tmp_dir
-    java_options = options[:java_options] || "-Dfile.encoding=utf8 -Xms512m -Xmx512m -XX:MaxPermSize=256m"
-    rows_limit = (limit = options[:rows_limit]) ? "-r #{limit}" : ""
+    limit = options[:rows_limit]
     
     if path =~ /\.csv/
       total_rows = 0
@@ -118,6 +117,8 @@ module Excel2CSV
         end
       end
     else
+      java_options = options[:java_options] || "-Dfile.encoding=utf8 -Xms512m -Xmx512m -XX:MaxPermSize=256m"
+      rows_limit = limit ? "-r #{limit}" : ""
       jar_path = File.join(File.dirname(__FILE__), "excel2csv.jar")
       `java #{java_options} -jar #{jar_path} #{rows_limit} #{path} #{dest_folder}`
     end
