@@ -483,7 +483,8 @@ public class ToCSV {
                     if(cell.getCellType() != Cell.CELL_TYPE_FORMULA) {
                         if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(cell)) {
                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z'('Z')'");
-                            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            // Output local time
+                            // df.setTimeZone(TimeZone.getTimeZone("UTC"));
                             csvLine.add(df.format(cell.getDateCellValue()));
                         } else {
                             csvLine.add(this.formatter.formatCellValue(cell));
