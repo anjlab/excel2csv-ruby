@@ -8,19 +8,22 @@ describe Excel2CSV do
   let(:csv_basic_types)  {"spec/fixtures/basic_types.csv"}
   let(:xls_basic_types)  {"spec/fixtures/basic_types.xls"}
   let(:xlsx_basic_types) {"spec/fixtures/basic_types.xlsx"}
+  let(:date_24) {Time.new(2011,12,24).strftime("%Y-%m-%d %H:%M:%S %Z(%z)")}
+  let(:date_25) {Time.new(2011,12,25).strftime("%Y-%m-%d %H:%M:%S %Z(%z)")}
+  let(:date_26) {Time.new(2011,12,26).strftime("%Y-%m-%d %H:%M:%S %Z(%z)")}
 
   it "reads xls files" do
     data = excel.read xls_basic_types
-    data[0].should == ["1.00", "2011-12-23 21:00:00 UTC(+0000)", "Hello"]
-    data[1].should == ["2.00", "2011-12-24 21:00:00 UTC(+0000)", "Привет"]
-    data[2].should == ["3.00", "2011-12-25 21:00:00 UTC(+0000)", 'Привет, "я excel!"']
+    data[0].should == ["1.00", date_24, "Hello"]
+    data[1].should == ["2.00", date_25, "Привет"]
+    data[2].should == ["3.00", date_26, 'Привет, "я excel!"']
   end
 
   it "reads xlsx files" do
     data = excel.read xlsx_basic_types
-    data[0].should == ["1.00", "2011-12-23 21:00:00 UTC(+0000)", "Hello"]
-    data[1].should == ["2.00", "2011-12-24 21:00:00 UTC(+0000)", "Привет"]
-    data[2].should == ["3.00", "2011-12-25 21:00:00 UTC(+0000)", 'Привет, "я excel!"']
+    data[0].should == ["1.00", date_24, "Hello"]
+    data[1].should == ["2.00", date_25, "Привет"]
+    data[2].should == ["3.00", date_26, 'Привет, "я excel!"']
   end
 
   it "iterates rows like CSV lib" do
@@ -70,7 +73,7 @@ describe Excel2CSV do
   it "reads previews" do
     data = excel.read(xls_basic_types, rows_limit:1, preview:true, index:0)
     data.length.should == 1
-    data[0].should == ["1.00", "2011-12-23 21:00:00 UTC(+0000)", "Hello"]
+    data[0].should == ["1.00", date_24, "Hello"]
   end
 
   it "reads csv files" do
