@@ -99,8 +99,7 @@ module Excel2CSV
     tmp_dir = Dir.mktmpdir
     dest_folder = options[:dest_folder] || tmp_dir
     limit = options[:rows_limit]
-    
-    if path =~ /\.csv/
+    if path =~ /\.csv$/
       total_rows = 0
       preview_rows = []
       opts = clean_options(options)
