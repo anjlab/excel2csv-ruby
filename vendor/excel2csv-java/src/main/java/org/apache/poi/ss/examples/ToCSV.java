@@ -30,7 +30,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -223,7 +222,6 @@ public class ToCSV {
                        throws FileNotFoundException, IOException,
                               IllegalArgumentException, InvalidFormatException {
         File source = new File(strSource);
-        File destination = new File(strDestination);
         File[] filesList = null;
         String destinationFilename = null;
 
@@ -327,6 +325,7 @@ public class ToCSV {
      * Called to convert the contents of the currently opened workbook into
      * a CSV file.
      */
+    @SuppressWarnings("unchecked")
     private void convertToCSV() {
         Sheet sheet = null;
         Row row = null;
@@ -480,18 +479,29 @@ public class ToCSV {
                     csvLine.add("");
                 }
                 else {
-                    if(cell.getCellType() != Cell.CELL_TYPE_FORMULA) {
-                        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-                            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z'('Z')'");
-                            // Output local time
-                            // df.setTimeZone(TimeZone.getTimeZone("UTC"));
-                            csvLine.add(df.format(cell.getDateCellValue()));
-                        } else {
-                            csvLine.add(this.formatter.formatCellValue(cell));
+                    try
+                    {
+                        if(cell.getCellType() != Cell.CELL_TYPE_FORMULA) {
+                            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+                                DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z'('Z')'");
+                                // Output local time
+                                // df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                csvLine.add(df.format(cell.getDateCellValue()));
+                            } else {
+                                csvLine.add(this.formatter.formatCellValue(cell));
+                            }
                         }
-                    }
-                    else {
-                        csvLine.add(this.formatter.formatCellValue(cell, this.evaluator));
+                        else {
+                            csvLine.add(this.formatter.formatCellValue(cell, this.evaluator));
+                        }
+                    } catch (RuntimeException e) {
+                        if (e.getMessage() != null 
+                                && e.getMessage().startsWith("Could not resolve external workbook")) {
+                            //  Issue #1
+                            csvLine.add("");
+                        } else {
+                            throw e;
+                        }
                     }
                 }
             }
