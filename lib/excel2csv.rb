@@ -83,8 +83,8 @@ module Excel2CSV
   module_function :convert
 
   def path_to_sheet(info, options = {})
+    options.delete(:encoding) # all previews are in utf-8
     if options[:preview]
-      options.delete(:encoding) # all previews are in utf-8
       collection = info.previews
     else
       collection = info.sheets
@@ -103,13 +103,19 @@ module Excel2CSV
       total_rows = 0
       preview_rows = []
       opts = clean_options(options)
-      CSV.foreach(path, opts) do |row| 
-        if limit && total_rows <= limit
-          preview_rows << row
+
+      # Transcode file to utf-8, count total and gen preview
+
+      CSV.open("#{dest_folder}/1-#{total_rows}.csv", "wb") do |csv|
+        CSV.foreach(path, opts) do |row| 
+          if limit && total_rows <= limit
+            preview_rows << row
+          end
+          total_rows += 1
+          csv << row
         end
-        total_rows += 1
       end
-      FileUtils.cp path, "#{dest_folder}/1-#{total_rows}.csv"
+      
       if limit
         CSV.open("#{dest_folder}/1-#{limit}-of-#{total_rows}-preview.csv", "wb") do |csv|
           preview_rows.each {|row| csv << row}
