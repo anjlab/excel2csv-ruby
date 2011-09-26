@@ -1,50 +1,10 @@
 require "excel2csv/version"
+require "excel2csv/info"
+
 require "csv"
 require "tmpdir"
-require "fileutils"
 
 module Excel2CSV
-
-  class Info
-    attr_accessor :sheets
-    attr_accessor :previews
-    attr_accessor :tmp_dir
-
-    def self.read dir, tmp_dir
-      info = Info.new dir, tmp_dir
-      info.read
-      info
-    end
-
-    def read
-      Dir["#{@working_dir}/*.csv"].map do |file|
-        name = File.basename(file)
-        m = /(?<sheet>\d+)-(?<rows>\d+)(-of-(?<total_rows>\d+))?/.match(name)
-        next if !m
-        total_rows   = (m[:total_rows] || m[:rows]).to_i
-        preview_rows = m[:rows].to_i
-        if name =~ /preview/
-          @previews << {path: file, total_rows:total_rows, rows:preview_rows}
-        else
-          @sheets << {path: file, total_rows:total_rows, rows:total_rows}
-        end
-      end
-    end 
-
-    def clean
-      FileUtils.remove_entry_secure(@tmp_dir, true) if @tmp_dir
-    end
-
-    private
-
-    def initialize working_dir, tmp_dir
-      @working_dir = working_dir
-      @tmp_dir = tmp_dir
-      @sheets = []
-      @previews = []
-    end
-
-  end
   
   def foreach(path, options = {}, &block) 
     convert(path, options) do |info|
@@ -64,7 +24,7 @@ module Excel2CSV
 
   def convert(path, options = {})
     info = options[:info]
-    if info && Dir.exists?(info.working_dir)
+    if info && Dir.exists?(info.working_folder)
       return block_given? ? yield(info) : info
     end
     begin
@@ -96,7 +56,7 @@ module Excel2CSV
 
   def create_cvs_files(path, options)
     tmp_dir = Dir.mktmpdir
-    dest_folder = options[:dest_folder] || tmp_dir
+    working_folder = options[:working_folder] || tmp_dir
     limit = options[:rows]
     if path =~ /\.csv$/
       total_rows = 0
@@ -105,7 +65,7 @@ module Excel2CSV
 
       # Transcode file to utf-8, count total and gen preview
 
-      CSV.open("#{dest_folder}/1-#{total_rows}.csv", "wb") do |csv|
+      CSV.open("#{working_folder}/1-#{total_rows}.csv", "wb") do |csv|
         CSV.foreach(path, opts) do |row| 
           if limit && total_rows <= limit
             preview_rows << row
@@ -116,7 +76,7 @@ module Excel2CSV
       end
       
       if limit
-        CSV.open("#{dest_folder}/1-#{limit}-of-#{total_rows}-preview.csv", "wb") do |csv|
+        CSV.open("#{working_folder}/1-#{limit}-of-#{total_rows}-preview.csv", "wb") do |csv|
           preview_rows.each {|row| csv << row}
         end
       end
@@ -124,17 +84,17 @@ module Excel2CSV
       java_options = options[:java_options] || "-Dfile.encoding=utf8 -Xms512m -Xmx512m -XX:MaxPermSize=256m"
       rows_limit = limit ? "-r #{limit}" : ""
       jar_path = File.join(File.dirname(__FILE__), "excel2csv.jar")
-      `java #{java_options} -jar #{jar_path} #{rows_limit} #{path} #{dest_folder}`
+      `java #{java_options} -jar #{jar_path} #{rows_limit} #{path} #{working_folder}`
     end
     
-    Info.read(dest_folder, tmp_dir)
+    Info.read(working_folder)
   end
 
   module_function :create_cvs_files
 
   def clean_options options
     options.dup.delete_if do |key, value|
-      [:dest_folder, :java_options, :preview, :sheet, :path, :rows, :info].include?(key)
+      [:working_folder, :java_options, :preview, :sheet, :path, :rows, :info].include?(key)
     end
   end
 

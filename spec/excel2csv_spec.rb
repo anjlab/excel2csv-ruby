@@ -35,14 +35,14 @@ describe Excel2CSV do
     count.should == 3
   end
 
-  it "removes tmp dir after work" do
-    tmp_dir = nil
+  it "removes tmp folder after work" do
+    working_folder = nil
     excel.convert xlsx_basic_types do |info|
       # puts IO.read(info.sheets.first[:path])
-      tmp_dir = info.tmp_dir
+      working_folder = info.working_folder
     end
-    tmp_dir.should_not be_nil
-    Dir.exists?(tmp_dir).should == false
+    working_folder.should_not be_nil
+    Dir.exists?(working_folder).should == false
   end
 
   it "converts once if info is passed" do
@@ -52,7 +52,7 @@ describe Excel2CSV do
     info.should == excel.convert(xlsx_basic_types, info:info)
   end
 
-  it "regenerate csv files if working_dir is removed" do
+  it "regenerate csv files if working_folder is removed" do
     info = excel.convert xlsx_basic_types
     info.clean
     info.should_not == excel.convert(xlsx_basic_types, info:info)
@@ -85,9 +85,9 @@ describe Excel2CSV do
 
   it "reads csv files with preview" do
     data = excel.read(csv_basic_types,
-      encoding:   'windows-1251:utf-8',
-      rows: 2,
-      preview:    true
+      encoding: 'windows-1251:utf-8',
+      rows:     2,
+      preview:  true
     )
     data[0].should == ["1.00","12/24/11 12:00 AM","Hello"]
     data[1].should == ["2.00","12/25/11 12:00 AM","Привет"]
