@@ -49,7 +49,7 @@ describe Excel2CSV do
     info = excel.convert xlsx_basic_types
     info.sheets.length.should == 1
     info.previews.length.should == 0
-    info.should == excel.convert("spec/fixtures/basic_types.xlsx", info:info)
+    info.should == excel.convert(xlsx_basic_types, info:info)
   end
 
   it "regenerate csv files if working_dir is removed" do
@@ -59,7 +59,7 @@ describe Excel2CSV do
   end
 
   it "generates preview csv files with rows limit" do
-    info = excel.convert xls_basic_types, rows_limit:1
+    info = excel.convert xls_basic_types, rows:1
     info.sheets.length.should == 1
     info.previews.length.should == 1
 
@@ -71,7 +71,7 @@ describe Excel2CSV do
   end
 
   it "reads previews" do
-    data = excel.read(xls_basic_types, rows_limit:1, preview:true, index:0)
+    data = excel.read(xls_basic_types, rows:1, preview:true, sheet:0)
     data.length.should == 1
     data[0].should == ["1.00", date_24, "Hello"]
   end
@@ -86,7 +86,7 @@ describe Excel2CSV do
   it "reads csv files with preview" do
     data = excel.read(csv_basic_types,
       encoding:   'windows-1251:utf-8',
-      rows_limit: 2,
+      rows: 2,
       preview:    true
     )
     data[0].should == ["1.00","12/24/11 12:00 AM","Hello"]

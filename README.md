@@ -34,12 +34,12 @@ Excel2CSV.foreach("path/to/file.xls") {|r| puts r}
 Excel2CSV.foreach("path/to/file.xlsx") {|r| puts r}
 
 # Read non first worksheet
-Excel2CSV.read "path/to/file.xls", index:1 #reads second sheet 
-Excel2CSV.read "path/to/file.xlsx", index:2 #reads third sheet
+Excel2CSV.read "path/to/file.xls", sheet:1 #reads second sheet 
+Excel2CSV.read "path/to/file.xlsx", sheet:2 #reads third sheet
 
 
 # Preview first N rows in big files
-Excel2CSV.read "path/to/file.xls", rows_limit: 2, preview: true
-Excel2CSV.read "path/to/file.xlsx", rows_limit: 2, preview: true
-Excel2CSV.read "path/to/file.csv", rows_limit: 2, preview: true
+Excel2CSV.read "path/to/file.xls", rows: 2, preview: true
+Excel2CSV.read "path/to/file.xlsx", rows: 2, preview: true
+Excel2CSV.read "path/to/file.csv", rows: 2, preview: true
 ```

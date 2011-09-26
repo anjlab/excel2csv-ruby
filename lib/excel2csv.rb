@@ -9,7 +9,6 @@ module Excel2CSV
     attr_accessor :sheets
     attr_accessor :previews
     attr_accessor :tmp_dir
-    attr_accessor :working_dir
 
     def self.read dir, tmp_dir
       info = Info.new dir, tmp_dir
@@ -89,7 +88,7 @@ module Excel2CSV
     else
       collection = info.sheets
     end
-    index = (idx = options[:index]) ? idx : 0
+    index = (idx = options[:sheet]) ? idx : 0
     collection[index][:path]
   end
 
@@ -98,7 +97,7 @@ module Excel2CSV
   def create_cvs_files(path, options)
     tmp_dir = Dir.mktmpdir
     dest_folder = options[:dest_folder] || tmp_dir
-    limit = options[:rows_limit]
+    limit = options[:rows]
     if path =~ /\.csv$/
       total_rows = 0
       preview_rows = []
@@ -135,7 +134,7 @@ module Excel2CSV
 
   def clean_options options
     options.dup.delete_if do |key, value|
-      [:dest_folder, :java_options, :preview, :index, :path, :rows_limit, :info].include?(key)
+      [:dest_folder, :java_options, :preview, :sheet, :path, :rows, :info].include?(key)
     end
   end
 
