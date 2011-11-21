@@ -25,6 +25,8 @@ module Excel2CSV
           @sheets << {path: file, total_rows:total_rows, rows:total_rows}
         end
       end
+      @previews.sort! {|a, b| a[:path] <=> b[:path]}
+      @sheets.sort! {|a, b| a[:path] <=> b[:path]}
     end 
 
     def clean
