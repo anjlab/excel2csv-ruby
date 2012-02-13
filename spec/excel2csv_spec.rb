@@ -8,6 +8,9 @@ describe Excel2CSV do
   let(:csv_basic_types)  {"spec/fixtures/basic_types.csv"}
   let(:xls_basic_types)  {"spec/fixtures/basic_types.xls"}
   let(:xlsx_basic_types) {"spec/fixtures/basic_types.xlsx"}
+  let(:csv_with_spaces)  {"spec/fixtures/file name with spaces.csv"}
+  let(:xls_with_spaces)  {"spec/fixtures/file name with spaces.xls"}
+  let(:xlsx_with_spaces) {"spec/fixtures/file name with spaces.xlsx"}
   let(:date_24) {Time.new(2011,12,24).strftime("%Y-%m-%dT%H:%M:%S")}
   let(:date_25) {Time.new(2011,12,25).strftime("%Y-%m-%dT%H:%M:%S")}
   let(:date_26) {Time.new(2011,12,26).strftime("%Y-%m-%dT%H:%M:%S")}
@@ -93,8 +96,22 @@ describe Excel2CSV do
     data[1].should == ["2.00","12/25/11 12:00 AM","Привет"]
   end
 
-  # Date, Boolean, String, [Phone, Percent, Email, Gender, Url]
-  # Несколько телефонов, 
+  context "file names with spaces" do
+    it "reads csv files" do
+      data = excel.read(csv_with_spaces, encoding:'windows-1251:utf-8')
+      data.should == [["1.00"], ["2.00"]]
+    end
+
+    it "reads xls files" do
+      data = excel.read(xls_with_spaces)
+      data.should == [["1"], ["2"]]
+    end
+
+    it "reads xlsx files" do
+      data = excel.read(xlsx_with_spaces)
+      data.should == [["1"], ["2"]]
+    end
+  end
 
 
 end

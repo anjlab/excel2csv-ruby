@@ -58,6 +58,7 @@ module Excel2CSV
     tmp_dir = Dir.mktmpdir
     working_folder = options[:working_folder] || tmp_dir
     limit = options[:rows]
+    path = File.expand_path(path)
     if path =~ /\.csv$/
       total_rows = 0
       preview_rows = []
@@ -84,7 +85,7 @@ module Excel2CSV
       java_options = options[:java_options] || "-Dfile.encoding=utf8 -Xms512m -Xmx512m -XX:MaxPermSize=256m"
       rows_limit = limit ? "-r #{limit}" : ""
       jar_path = File.join(File.dirname(__FILE__), "excel2csv.jar")
-      `java #{java_options} -jar #{jar_path} #{rows_limit} #{path} #{working_folder}`
+      `java #{java_options} -jar #{jar_path} #{rows_limit} "#{path}" #{working_folder}`
     end
     
     Info.read(working_folder)
