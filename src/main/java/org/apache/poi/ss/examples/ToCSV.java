@@ -30,6 +30,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +50,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Demonstrates <em>one</em> way to convert an Excel spreadsheet into a CSV
@@ -147,7 +151,7 @@ public class ToCSV {
 
     private Workbook workbook = null;
     private int sheetIndex = 0;
-    private ArrayList<ArrayList<String>>[] csvData = null;
+    private List<List<List<String>>> csvData = null;
     private int maxRowWidth = 0;
     private int formattingConvention = 0;
     private DataFormatter formatter = null;
@@ -217,10 +221,11 @@ public class ToCSV {
      * @throws org.apache.poi.openxml4j.exceptions.InvalidFormatException Thrown
      *         if the xml markup encounetered whilst parsing a SpreadsheetML
      *         file (.xlsx) is invalid.
+     * @throws JSONException 
      */
     public void process()
                        throws FileNotFoundException, IOException,
-                              IllegalArgumentException, InvalidFormatException {
+                              IllegalArgumentException, InvalidFormatException, JSONException {
         File source = new File(strSource);
         File[] filesList = null;
         String destinationFilename = null;
@@ -269,6 +274,8 @@ public class ToCSV {
             // Convert it's contents into a CSV file
             this.convertToCSV();
 
+            removeLastEmptySheets();
+            
             end = System.currentTimeMillis();
             System.out.println(end - start);
             start = end;
@@ -280,9 +287,19 @@ public class ToCSV {
                     0, destinationFilename.lastIndexOf(".")) +
                     ToCSV.CSV_FILE_EXTENSION;
 
-            // Save the CSV file away using the newly constricted file name
+            // Save the CSV file away using the newly constructed file name
             // and to the specified directory.
             this.saveCSVFile();
+        }
+    }
+
+    private void removeLastEmptySheets() {
+        for (int i = csvData.size() - 1; i >= 0; i--) {
+            if (csvData.get(i).size() == 0) {
+                csvData.remove(i);
+            } else {
+                break;
+            }
         }
     }
 
@@ -325,7 +342,6 @@ public class ToCSV {
      * Called to convert the contents of the currently opened workbook into
      * a CSV file.
      */
-    @SuppressWarnings("unchecked")
     private void convertToCSV() {
         Sheet sheet = null;
         Row row = null;
@@ -336,13 +352,13 @@ public class ToCSV {
         // Discover how many sheets there are in the workbook....
         int numSheets = this.workbook.getNumberOfSheets();
 
-        this.csvData = new ArrayList[numSheets];
+        this.csvData = new ArrayList<List<List<String>>>(numSheets);
 
         // and then iterate through them.
         for(int i = 0; i < numSheets; i++) {
 
             this.sheetIndex = i;
-            this.csvData[i] = new ArrayList<ArrayList<String>>();
+            this.csvData.add(new ArrayList<List<String>>());
             
             // Get a reference to a sheet and check to see if it contains
             // any rows.
@@ -364,26 +380,44 @@ public class ToCSV {
         }
     }
 
-    private void saveCSVFile() throws FileNotFoundException, IOException {
+    private void saveCSVFile() throws FileNotFoundException, IOException, JSONException {
         System.out.println("Saving the CSV files [" + strDestination + "]");
-
-        for (int s = 0; s < this.csvData.length; s++) {
         
-            ArrayList<ArrayList<String>> rows = this.csvData[s]; 
+        JSONObject csvInfo = new JSONObject();
+        csvInfo.put("sourceFile", strSource);
+        csvInfo.put("targetDir", strDestination);
+        csvInfo.put("generatePreviews", rowLimit != Integer.MAX_VALUE);
+        csvInfo.put("perSheetRowLimitForPreviews", rowLimit);
+        
+        JSONArray sheets = new JSONArray();
+        csvInfo.put("sheets", sheets);
+        
+        for (int s = 0; s < this.csvData.size(); s++) {
+        
+            List<List<String>> rows = this.csvData.get(s); 
+            JSONObject sheet = new JSONObject();
             
-            saveToFile(s, rows, false);
+            File file = saveToFile(s, rows, false);
+            sheet.put("fullOutput", file.getName());
             
             if (rowLimit != Integer.MAX_VALUE) {
-                saveToFile(s, rows, true);
+                file = saveToFile(s, rows, true);
+                sheet.put("previewOutput", file.getName());
             }
+            
+            sheets.put(sheet);
         }
+        
+        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(strDestination, "info.json")));
+        writer.write(csvInfo.toString(2));
+        writer.close();
     }
 
-    private void saveToFile(int s, ArrayList<ArrayList<String>> rows, boolean preview)
+    private File saveToFile(int s, List<List<String>> rows, boolean preview)
             throws IOException {
         FileWriter fw = null;
         BufferedWriter bw = null;
-        ArrayList<String> line;
+        List<String> line;
         StringBuffer buffer;
         String csvLineElement;
         try {
@@ -441,6 +475,7 @@ public class ToCSV {
                     bw.newLine();
                 }
             }
+            return file;
         }
         finally {
             if(bw != null) {
@@ -512,7 +547,7 @@ public class ToCSV {
                 this.maxRowWidth = lastCellNum;
             }
         }
-        this.csvData[sheetIndex].add(csvLine);
+        this.csvData.get(sheetIndex).add(csvLine);
     }
 
     /**
