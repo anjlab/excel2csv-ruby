@@ -398,6 +398,7 @@ public class ToCSV {
             JSONObject sheet = new JSONObject();
             
             File file = saveToFile(s, rows, false);
+            sheet.put("title", this.workbook.getSheetAt(s).getSheetName());
             sheet.put("rowCount", rows.size());
             sheet.put("fullOutput", file.getName());
             
