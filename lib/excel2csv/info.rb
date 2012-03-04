@@ -1,4 +1,5 @@
-require "fileutils"
+require 'fileutils'
+require 'json'
 
 module Excel2CSV
   class Info
@@ -13,20 +14,22 @@ module Excel2CSV
     end
 
     def read
-      Dir["#{@working_folder}/*.csv"].map do |file|
-        name = File.basename(file)
-        m = /(?<sheet>\d+)-(?<rows>\d+)(-of-(?<total_rows>\d+))?/.match(name)
-        next if !m
-        total_rows   = (m[:total_rows] || m[:rows]).to_i
-        preview_rows = m[:rows].to_i
-        if name =~ /preview/
-          @previews << {path: file, total_rows:total_rows, rows:preview_rows}
-        else
-          @sheets << {path: file, total_rows:total_rows, rows:total_rows}
-        end
+      info = JSON.parse(File.read("#{@working_folder}/info.json"))
+      info['sheets'].each do |sheet_info|
+        @sheets << {
+          path:       "#{@working_folder}/#{sheet_info['fullOutput']}",
+          total_rows: sheet_info['rowCount'],
+          rows:       sheet_info['rowCount'],
+          title:      sheet_info['title']
+        }
+        
+        @previews << {
+          path:       "#{@working_folder}/#{sheet_info['previewOutput']}",
+          total_rows: sheet_info['rowCount'],
+          rows:       info['perSheetRowLimitForPreviews'],
+          title:      sheet_info['title']
+        } if sheet_info['previewOutput']
       end
-      @previews.sort! {|a, b| a[:path] <=> b[:path]}
-      @sheets.sort! {|a, b| a[:path] <=> b[:path]}
     end 
 
     def clean

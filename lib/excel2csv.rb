@@ -3,6 +3,7 @@ require "excel2csv/info"
 
 require "csv"
 require "tmpdir"
+require "json"
 
 module Excel2CSV
   
@@ -60,13 +61,20 @@ module Excel2CSV
     limit = options[:rows]
     path = File.expand_path(path)
     if path =~ /\.csv$/
+      json = {
+        'generatePreviews' => !!limit,
+        'perSheetRowLimitForPreviews' => limit,
+        'sourceFile' => path.to_s,
+        'targetDir' => working_folder
+      }
       total_rows = 0
       preview_rows = []
       opts = clean_options(options)
-
+      sheetJson = {}
+      
+      full_output = "1-#{total_rows}.csv"
       # Transcode file to utf-8, count total and gen preview
-
-      CSV.open("#{working_folder}/1-#{total_rows}.csv", "wb") do |csv|
+      CSV.open("#{working_folder}/#{full_output}", "wb") do |csv|
         CSV.foreach(path, opts) do |row| 
           if limit && total_rows <= limit
             preview_rows << row
@@ -75,11 +83,19 @@ module Excel2CSV
           csv << row
         end
       end
+      sheetJson['fullOutput'] = full_output
+      sheetJson['rowCount'] = total_rows
       
       if limit
-        CSV.open("#{working_folder}/1-#{limit}-of-#{total_rows}-preview.csv", "wb") do |csv|
+        preview_output = "1-#{limit}-of-#{total_rows}-preview.csv"
+        sheetJson['previewOutput'] = preview_output
+        CSV.open("#{working_folder}/#{preview_output}", "wb") do |csv|
           preview_rows.each {|row| csv << row}
         end
+      end
+      json['sheets'] = [sheetJson]
+      File.open "#{working_folder}/info.json", "wb" do |f|
+        f.write(JSON.generate(json))
       end
     else
       java_options = options[:java_options] || "-Dfile.encoding=utf8 -Xms512m -Xmx512m -XX:MaxPermSize=256m"
