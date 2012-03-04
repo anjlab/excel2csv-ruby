@@ -16,5 +16,5 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Excel2CSV::VERSION
 
-  gem.add_development_dependency "rspec", "<= 2.6"
+  gem.add_development_dependency "rspec", ">= 2.8"
 end
