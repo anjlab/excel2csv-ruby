@@ -151,8 +151,7 @@ public class ToCSV {
 
     private Workbook workbook = null;
     private int sheetIndex = 0;
-    private List<List<List<String>>> csvData = null;
-    private int maxRowWidth = 0;
+    private List<SheetInfo> csvData = null;
     private int formattingConvention = 0;
     private DataFormatter formatter = null;
     private FormulaEvaluator evaluator = null;
@@ -295,7 +294,7 @@ public class ToCSV {
 
     private void removeLastEmptySheets() {
         for (int i = csvData.size() - 1; i >= 0; i--) {
-            if (csvData.get(i).size() == 0) {
+            if (csvData.get(i).getRowCount() == 0) {
                 csvData.remove(i);
             } else {
                 break;
@@ -352,13 +351,13 @@ public class ToCSV {
         // Discover how many sheets there are in the workbook....
         int numSheets = this.workbook.getNumberOfSheets();
 
-        this.csvData = new ArrayList<List<List<String>>>(numSheets);
+        this.csvData = new ArrayList<SheetInfo>(numSheets);
 
         // and then iterate through them.
         for(int i = 0; i < numSheets; i++) {
 
             this.sheetIndex = i;
-            this.csvData.add(new ArrayList<List<String>>());
+            this.csvData.add(new SheetInfo());
             
             // Get a reference to a sheet and check to see if it contains
             // any rows.
@@ -394,16 +393,16 @@ public class ToCSV {
         
         for (int s = 0; s < this.csvData.size(); s++) {
         
-            List<List<String>> rows = this.csvData.get(s); 
+            SheetInfo sheetInfo = this.csvData.get(s); 
             JSONObject sheet = new JSONObject();
             
-            File file = saveToFile(s, rows, false);
+            File file = saveToFile(s, sheetInfo, false);
             sheet.put("title", this.workbook.getSheetAt(s).getSheetName());
-            sheet.put("rowCount", rows.size());
+            sheet.put("rowCount", sheetInfo.getRowCount());
             sheet.put("fullOutput", file.getName());
             
             if (rowLimit != Integer.MAX_VALUE) {
-                file = saveToFile(s, rows, true);
+                file = saveToFile(s, sheetInfo, true);
                 sheet.put("previewOutput", file.getName());
             }
             
@@ -415,7 +414,7 @@ public class ToCSV {
         writer.close();
     }
 
-    private File saveToFile(int s, List<List<String>> rows, boolean preview)
+    private File saveToFile(int s, SheetInfo sheetInfo, boolean preview)
             throws IOException {
         FileWriter fw = null;
         BufferedWriter bw = null;
@@ -424,8 +423,8 @@ public class ToCSV {
         String csvLineElement;
         try {
             File file = preview 
-                    ? new File(strDestination, (s+1) + "-" + this.rowLimit + "-of-" + rows.size() + "-preview.csv")
-                    : new File(strDestination, (s+1) + "-" + rows.size() + ".csv");
+                    ? new File(strDestination, (s+1) + "-" + this.rowLimit + "-of-" + sheetInfo.getRowCount() + "-preview.csv")
+                    : new File(strDestination, (s+1) + "-" + sheetInfo.getRowCount() + ".csv");
             
             if (file.exists()) {
                 file.delete();
@@ -438,7 +437,7 @@ public class ToCSV {
             // Step through the elements of the ArrayList that was used to hold
             // all of the data recovered from the Excel workbooks' sheets, rows
             // and cells.
-            for(int i = 0; i < (preview ? Math.min(rows.size(), rowLimit) : rows.size()); i++) {
+            for(int i = 0; i < (preview ? Math.min(sheetInfo.getRowCount(), rowLimit) : sheetInfo.getRowCount()); i++) {
                 buffer = new StringBuffer();
       
                 // Get an element from the ArrayList that contains the data for
@@ -453,8 +452,8 @@ public class ToCSV {
                 // the for loop to ensure that the ArrayList contains data to be
                 // processed. If it does, then an element will be recovered and
                 // appended to the StringBuffer.
-                line = rows.get(i);
-                for(int j = 0; j < this.maxRowWidth; j++) {
+                line = sheetInfo.getRow(i);
+                for(int j = 0; j < sheetInfo.getMaxRowWidth(); j++) {
                     if(line.size() > j) {
                         csvLineElement = line.get(j);
                         if(csvLineElement != null) {
@@ -462,7 +461,7 @@ public class ToCSV {
                                     csvLineElement));
                         }
                     }
-                    if(j < (this.maxRowWidth - 1)) {
+                    if(j < (sheetInfo.getMaxRowWidth() - 1)) {
                         buffer.append(this.separator);
                     }
                 }
@@ -473,7 +472,7 @@ public class ToCSV {
                 // Condition the inclusion of new line characters so as to
                 // avoid an additional, superfluous, new line at the end of
                 // the file.
-                if(i < (rows.size() - 1)) {
+                if(i < (sheetInfo.getRowCount() - 1)) {
                     bw.newLine();
                 }
             }
@@ -542,14 +541,12 @@ public class ToCSV {
                     }
                 }
             }
-            // Make a note of the index number of the right most cell. This value
-            // will later be used to ensure that the matrix of data in the CSV file
-            // is square.
-            if(lastCellNum > this.maxRowWidth) {
-                this.maxRowWidth = lastCellNum;
-            }
         }
-        this.csvData.get(sheetIndex).add(csvLine);
+        this.csvData.get(sheetIndex).addRow(csvLine);
+    }
+
+    public static boolean isNullOrEmpty(String string) {
+        return string == null || string.length() == 0;
     }
 
     /**
