@@ -98,7 +98,7 @@ module Excel2CSV
         f.write(JSON.generate(json))
       end
     else
-      java_options = options[:java_options] || "-Dfile.encoding=utf8 -Xms512m -Xmx512m -XX:MaxPermSize=256m"
+      java_options = options[:java_options] || "-Dfile.encoding=utf8 -Xms1024m -Xmx1024m -XX:MaxPermSize=512m"
       rows_limit = limit ? "-r #{limit}" : ""
       jar_path = File.join(File.dirname(__FILE__), "excel2csv.jar")
       `java #{java_options} -jar #{jar_path} #{rows_limit} "#{path}" #{working_folder}`
