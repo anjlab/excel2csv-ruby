@@ -528,7 +528,12 @@ public class ToCSV {
                             }
                         }
                         else {
-                            csvLine.add(this.formatter.formatCellValue(cell, this.evaluator));
+                            String value = cell.getCellFormula();
+                            try {
+                                value = this.formatter.formatCellValue(cell, this.evaluator);
+                            } catch (Exception e) {
+                            }
+                            csvLine.add(value);
                         }
                     } catch (RuntimeException e) {
                         if (e.getMessage() != null 
