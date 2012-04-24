@@ -2,7 +2,6 @@
 require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
 
-
 desc "Run specs"
 RSpec::Core::RakeTask.new do |t|
   t.rspec_opts = %w(-fs --color)
@@ -19,14 +18,14 @@ namespace :java do
     if File.exist? jar.to_s
       cp jar, "lib/excel2csv.jar"
     else
-      raise "Can't find #{vendor/excel2csv-java/target}/excel2csv-x.x.x.jar. Java build is broken?"
+      abort "Can't find #{vendor/excel2csv-java/target}/excel2csv-x.x.x.jar. Java build is broken?"
     end
   end
 
   desc "Pull excel2csv-java/master subtree."
   task :pull do
     if !system "git pull -s subtree java master"
-      abort("Have to add java remote `git remote add -f java git@github.com:anjlab/excel2csv-java.git`")
+      abort "Have to add java remote `git remote add -f java git@github.com:anjlab/excel2csv-java.git`"
     end
   end
 end
