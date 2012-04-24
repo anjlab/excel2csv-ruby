@@ -11,7 +11,7 @@ task :default => :spec
 
 namespace :java do
   desc "Build java jar with mvn"
-  task "build" do
+  task :build do
     java_excel2csv_home = "vendor/excel2csv-java"
     system "cd #{java_excel2csv_home} && mvn clean package"
     jar = FileList["#{java_excel2csv_home}/target/excel2csv*.jar"].first
