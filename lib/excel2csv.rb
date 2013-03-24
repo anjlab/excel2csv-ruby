@@ -60,7 +60,7 @@ module Excel2CSV
     working_folder = options[:working_folder] || tmp_dir
     limit = options[:rows]
     path = File.expand_path(path)
-    if path =~ /\.csv$/
+    if path =~ /\.(csv)|(txt)$/
       json = {
         'generatePreviews' => !!limit,
         'perSheetRowLimitForPreviews' => limit,

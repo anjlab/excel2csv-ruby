@@ -5,6 +5,7 @@ require 'excel2csv'
 describe Excel2CSV do
 
   let(:excel) {Excel2CSV}
+  let(:plain)            {"spec/fixtures/plain.txt"}
   let(:csv_basic_types)  {"spec/fixtures/basic_types.csv"}
   let(:xls_basic_types)  {"spec/fixtures/basic_types.xls"}
   let(:xlsx_basic_types) {"spec/fixtures/basic_types.xlsx"}
@@ -14,6 +15,12 @@ describe Excel2CSV do
   let(:date_24) {Time.new(2011,12,24).strftime("%Y-%m-%dT%H:%M:%S")}
   let(:date_25) {Time.new(2011,12,25).strftime("%Y-%m-%dT%H:%M:%S")}
   let(:date_26) {Time.new(2011,12,26).strftime("%Y-%m-%dT%H:%M:%S")}
+
+  it "reads plain txt files" do
+    data = excel.read plain
+    data[0].should == ["123"]
+    data[1].should == ["456"]
+  end
 
   it "reads xls files" do
     data = excel.read xls_basic_types
